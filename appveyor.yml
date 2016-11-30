@@ -1,2 +1,4 @@
 before_build:
   - nuget restore
+on_success:
+  - ps: .\pushToNuget.ps1
