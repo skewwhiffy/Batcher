@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>skewwhiffy.batcher</id>
+    <version>$version$</version>
+    <title>Batcher</title>
+    <authors>Kenny Hung</authors>
+    <owners>Kenny Hung</owners>
+    <licenseUrl>https://github.com/skewwhiffy/Batcher/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/skewwhiffy/Batcher</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A framework for parallelization of batch processes</description>
+    <copyright>Copyright 2016</copyright>
+  </metadata>
+  <files>
+    <file src="bin\Release\Skewwhiffy.Batcher.dll" target="lib\net461"/>
+  </files>
+</package>
