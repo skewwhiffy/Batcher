@@ -1,4 +1,12 @@
+configuration:
+  - Release
 before_build:
   - nuget restore
-on_success:
-  - ps: .\pushToNuget.ps1
+after_test:
+  - ps: .\build\nuget\pack.ps1
+deploy:
+  - provider: NuGet
+    api_key:
+      secure: 9ebswdLv/QpQcZHHGZI6pJKSQu6tU+iSMKkRxd+2FkzcGW7byqkkm29Z80Ys4Fat
+    skip_symbols: false
+    artifact: /.*\.nupkg/
