@@ -41,7 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyFirst.cs" />
+    <Compile Include="BatchExceptionEventArguments.cs" />
+    <Compile Include="FunctionalExtensions.cs" />
+    <Compile Include="SingleThreadBatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

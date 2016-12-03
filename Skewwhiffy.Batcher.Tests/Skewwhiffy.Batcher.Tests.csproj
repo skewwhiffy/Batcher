@@ -45,8 +45,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyFirstTest.cs" />
+    <Compile Include="SingleThreadTests\HappyPath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SingleThreadTests\UnhappyPath.cs" />
+    <Compile Include="TestHelpers\BatchAction.cs" />
+    <Compile Include="TestHelpers\SynchronicityTestCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
