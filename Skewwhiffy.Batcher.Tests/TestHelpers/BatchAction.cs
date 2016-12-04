@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Skewwhiffy.Batcher.Tests.TestHelpers
@@ -13,7 +12,6 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
     {
         private List<int> _start;
         private ConcurrentBag<int> _processed;
-        private ConcurrentBag<string> _actual;
         private SingleThreadBatcher<int> _batcher;
         private Func<int, bool> _throwWhen;
 
@@ -22,7 +20,6 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
             _throwWhen = i => false;
             _start = Enumerable.Range(0, 100).ToList();
             _processed = new ConcurrentBag<int>();
-            _actual = new ConcurrentBag<string>();
         }
 
         public void InitializeBatcher(SynchronicityTestCase synchronicity)
@@ -105,7 +102,6 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
             else
             {
                 var result = (input * input).ToString();
-                _actual.Add(result);
                 _processed.Add(input);
             }
         }

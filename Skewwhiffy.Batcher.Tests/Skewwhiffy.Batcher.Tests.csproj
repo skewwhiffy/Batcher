@@ -45,10 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SingleThreadTests\HappyPath.cs" />
+    <Compile Include="ChainTests\ChainBatcherHappyPath.cs" />
+    <Compile Include="SingleThreadTests\SingleThreadHappyPath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SingleThreadTests\UnhappyPath.cs" />
+    <Compile Include="SingleThreadTests\SingleThreadUnhappyPath.cs" />
     <Compile Include="TestHelpers\BatchAction.cs" />
+    <Compile Include="TestHelpers\ChainBatchAction.cs" />
     <Compile Include="TestHelpers\SynchronicityTestCase.cs" />
   </ItemGroup>
   <ItemGroup>

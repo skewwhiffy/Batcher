@@ -9,14 +9,14 @@ namespace Skewwhiffy.Batcher.Tests.SingleThreadTests
 {
     [TestFixture(SynchronicityTestCase.Synchronous)]
     [TestFixture(SynchronicityTestCase.Asynchronous)]
-    public class UnhappyPath
+    public class SingleThreadUnhappyPath
     {
         private SynchronicityTestCase _synchronicity;
         private BatchAction _batchAction;
         private Func<int, bool> _throwWhen;
         private ConcurrentBag<BatchExceptionEventArguments<int>> _exceptionEvents;
 
-        public UnhappyPath(SynchronicityTestCase synchronicity)
+        public SingleThreadUnhappyPath(SynchronicityTestCase synchronicity)
         {
             _synchronicity = synchronicity;
             _exceptionEvents = new ConcurrentBag<BatchExceptionEventArguments<int>>();

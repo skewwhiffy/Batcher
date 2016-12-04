@@ -12,12 +12,12 @@ namespace Skewwhiffy.Batcher
         private readonly Action<T> _actionSync;
         private readonly Func<T, Task> _actionAsync;
         private readonly List<Exception> _exceptions;
+        private Task _processor;
 
         private SingleThreadBatcher()
         {
             _toProcess = new ConcurrentQueue<T>();
             _exceptions = new List<Exception>();
-            Task.Run(() => Process());
         }
 
         public SingleThreadBatcher(Action<T> action) : this()
@@ -37,7 +37,16 @@ namespace Skewwhiffy.Batcher
 
         public void Process(T toProcess)
         {
+            Start();
             _toProcess.Enqueue(toProcess);
+        }
+
+        private void Start()
+        {
+            if (_processor == null)
+            {
+                _processor = Task.Run(() => Process());
+            }
         }
 
         public List<Exception> Exceptions => _exceptions.ToList();
