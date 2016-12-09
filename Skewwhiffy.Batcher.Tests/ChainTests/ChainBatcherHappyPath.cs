@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using Skewwhiffy.Batcher.Tests.TestHelpers;
 using System.Threading.Tasks;
+using Skewwhiffy.Batcher.Fluent;
 
 namespace Skewwhiffy.Batcher.Tests.ChainTests
 {
@@ -8,8 +9,9 @@ namespace Skewwhiffy.Batcher.Tests.ChainTests
     [TestFixture(SynchronicityTestCase.Asynchronous)]
     public class ChainBatcherHappyPath
     {
-        private ChainBatchAction _batchAction;
+        private ChainBatcherTestSetup _setup;
         private readonly SynchronicityTestCase _synchronicity;
+        private IBatcher<int> _batcher;
 
         public ChainBatcherHappyPath(SynchronicityTestCase synchronicity)
         {
@@ -19,20 +21,27 @@ namespace Skewwhiffy.Batcher.Tests.ChainTests
         [OneTimeSetUp]
         public async Task BeforeAll()
         {
-            _batchAction = new ChainBatchAction();
-            _batchAction.InitializeBatcherStartingWith(_synchronicity);
-            _batchAction.StartBatcher();
-            await _batchAction.WaitUntilAllProcessed();
+            _setup = new ChainBatcherTestSetup();
+            _batcher = _setup.GetBatcher(_synchronicity);
+            _batcher.Process(_setup.StartItems);
+            await _batcher.WaitUntilDone();
+        }
+
+
+        [OneTimeTearDown]
+        public void AfterAll()
+        {
+            _batcher.Dispose();
         }
 
         [Test]
         public void ActionWorks()
         {
-            Assert.That(_batchAction.ProcessedItemsCount, Is.EqualTo(_batchAction.StartItems.Count));
-            var squared = _batchAction.SquaredItems;
-            var convertedToString = _batchAction.ConvertedToString;
-            var results = _batchAction.Results;
-            _batchAction.StartItems.ForEach(s =>
+            Assert.That(_setup.ProcessedItems.Count, Is.EqualTo(_setup.StartItems.Count));
+            var squared = _setup.SquaredItems;
+            var convertedToString = _setup.ConvertedToString;
+            var results = _setup.Results;
+            _setup.StartItems.ForEach(s =>
             {
                 Assert.That(squared.Contains(s));
                 var itemSquared = s * s;

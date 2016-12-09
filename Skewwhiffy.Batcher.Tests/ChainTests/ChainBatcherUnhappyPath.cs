@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Concurrent;
 using System;
+using Skewwhiffy.Batcher.Extensions;
+using Skewwhiffy.Batcher.Fluent;
 
 namespace Skewwhiffy.Batcher.Tests.ChainTests
 {
@@ -12,7 +14,8 @@ namespace Skewwhiffy.Batcher.Tests.ChainTests
     public class ChainBatcherUnhappyPath
     {
         private readonly SynchronicityTestCase _synchronicity;
-        private ChainBatchAction _batchAction;
+        private ChainBatcherTestSetup _setup;
+        private IBatcher<int> _batcher;
         private ConcurrentBag<Tuple<object, BatchExceptionEventArguments>> _batchExceptionEvents;
 
         public ChainBatcherUnhappyPath(SynchronicityTestCase synchronicity)
@@ -24,23 +27,30 @@ namespace Skewwhiffy.Batcher.Tests.ChainTests
         public async Task BeforeAll()
         {
             _batchExceptionEvents = new ConcurrentBag<Tuple<object, BatchExceptionEventArguments>>();
-            _batchAction = new ChainBatchAction();
-            _batchAction.ThrowWhenSquaring(ThrowWhenSquaring);
-            _batchAction.ThrowWhenConvertingToString(ThrowWhenConvertingToString);
-            _batchAction.ThrowWhenPuttingInResultsBag(ThrowWhenPuttingInResultsBag);
-            _batchAction.InitializeBatcherStartingWith(_synchronicity);
-            _batchAction.Batcher.ExceptionEvent += (o, e) => _batchExceptionEvents.Add(Tuple.Create(o, e));
-            _batchAction.StartBatcher();
-            await _batchAction.WaitUntilAllProcessed();
+            _setup = new ChainBatcherTestSetup();
+            _setup.ThrowWhenSquaring(ThrowWhenSquaring);
+            _setup.ThrowWhenConvertingToString(ThrowWhenConvertingToString);
+            _setup.ThrowWhenPuttingInResultsBag(ThrowWhenPuttingInResultsBag);
+            _batcher = _setup.GetBatcher(_synchronicity);
+            _batcher.ExceptionEvent += (o, e) => _batchExceptionEvents.Add(Tuple.Create(o, e));
+            _batcher.Process(_setup.StartItems);
+            await _batcher.WaitUntilDone();
+        }
+
+
+        [OneTimeTearDown]
+        public void AfterAll()
+        {
+            _batcher.Dispose();
         }
 
         [Test]
         public void AllItemsAreProcessed()
         {
-            var squared = _batchAction.SquaredItems;
-            var convertedToString = _batchAction.ConvertedToString;
-            var results = _batchAction.Results;
-            _batchAction.StartItems.ForEach(s =>
+            var squared = _setup.SquaredItems;
+            var convertedToString = _setup.ConvertedToString;
+            var results = _setup.Results;
+            _setup.StartItems.ForEach(s =>
             {
                 if (ThrowWhenSquaring(s))
                 {
@@ -71,14 +81,15 @@ namespace Skewwhiffy.Batcher.Tests.ChainTests
         public void ExceptionsCaptured()
         {
             var expected = 0;
-            var start = _batchAction.StartItems;
+            var start = _setup.StartItems;
             expected += start.Count(ThrowWhenSquaring);
             var squared = start.FindAll(i => !ThrowWhenSquaring(i)).Select(i => i * i).ToList();
             expected += squared.Count(ThrowWhenConvertingToString);
             var convertedToString = squared.FindAll(i => !ThrowWhenConvertingToString(i)).Select(i => i.ToString()).ToList();
             expected += convertedToString.Count(ThrowWhenPuttingInResultsBag);
 
-            var actual = _batchAction.Batcher.Exceptions;
+            var actual = _batcher.Exceptions;
+            Assert.That(actual.Count, Is.EqualTo(expected));
         }
 
         [Test]
@@ -86,7 +97,7 @@ namespace Skewwhiffy.Batcher.Tests.ChainTests
         {
             var actual = _batchExceptionEvents.GroupBy(e => e.Item1).ToDictionary(g => g.Key, g => g.Select(i => i.Item2).ToList());
 
-            var start = _batchAction.StartItems;
+            var start = _setup.StartItems;
             Assert.That(actual.Any(kvp => kvp.Value.Count == start.Count(ThrowWhenSquaring)));
 
             var squared = start.FindAll(i => !ThrowWhenSquaring(i)).Select(i => i * i).ToList();

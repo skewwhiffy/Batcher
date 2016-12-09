@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Skewwhiffy.Batcher
+namespace Skewwhiffy.Batcher.Extensions
 {
     public class BatchExceptionEventArguments<T> : BatchExceptionEventArguments
     {

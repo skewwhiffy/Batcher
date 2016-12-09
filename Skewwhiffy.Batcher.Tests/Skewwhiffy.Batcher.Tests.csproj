@@ -45,14 +45,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CancellationTests\Cancellation.cs" />
     <Compile Include="ChainTests\ChainBatcherHappyPath.cs" />
     <Compile Include="ChainTests\ChainBatcherUnhappyPath.cs" />
-    <Compile Include="SingleThreadTests\SingleThreadHappyPath.cs" />
+    <Compile Include="SingleTaskTests\SingleTaskHappyPath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SingleThreadTests\SingleThreadUnhappyPath.cs" />
-    <Compile Include="TestHelpers\BatchAction.cs" />
-    <Compile Include="TestHelpers\ChainBatchAction.cs" />
+    <Compile Include="SingleTaskTests\SingleTaskUnhappyPath.cs" />
+    <Compile Include="TestHelpers\BatcherExtensions.cs" />
+    <Compile Include="TestHelpers\ISetupBatchTests.cs" />
+    <Compile Include="TestHelpers\SingleTaskBatcherTestSetup.cs" />
+    <Compile Include="TestHelpers\ChainBatcherTestSetup.cs" />
     <Compile Include="TestHelpers\SynchronicityTestCase.cs" />
+    <Compile Include="TestHelpers\TaskMultiplicityTestCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
