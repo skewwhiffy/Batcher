@@ -20,6 +20,18 @@ namespace Skewwhiffy.Batcher.Tests.ChainTests
         [Test]
         public void ActionWorks()
         {
+            Assert.That(_batchAction.ProcessedItemsCount, Is.EqualTo(_batchAction.StartItems.Count));
+            var squared = _batchAction.SquaredItems;
+            var convertedToString = _batchAction.ConvertedToString;
+            var results = _batchAction.Results;
+            _batchAction.StartItems.ForEach(s =>
+            {
+                Assert.That(squared.Contains(s));
+                var itemSquared = s * s;
+                Assert.That(convertedToString.Contains(itemSquared));
+                var squaredString = itemSquared.ToString();
+                Assert.That(results.Contains(squaredString));
+            });
         }
     }
 }

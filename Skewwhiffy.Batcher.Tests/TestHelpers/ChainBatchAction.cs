@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,6 +15,9 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
         private ConcurrentBag<int> _convertedToString;
         private ConcurrentBag<string> _results;
         private ChainBatcher<int> _batcher;
+        private Func<int, bool> _throwWhenSquaring;
+        private Func<int, bool> _throwWhenConvertingToString;
+        private Func<string, bool> _throwWhenPuttingInResultsBag;
 
         public ChainBatchAction()
         {
@@ -23,31 +27,41 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
             _results = new ConcurrentBag<string>();
         }
 
-        public void InitializeBatcher()
-        {
-            _batcher = new ChainBatcher<int>(Square, ConvertToString, PutInBag);
-        }
+        public ChainBatcher<int> Batcher => _batcher;
 
-        public void StartBatcher()
-        {
-            _batcher.Process(_start);
-        }
+        public void InitializeBatcher() => _batcher = new ChainBatcher<int>(Square, ConvertToString, PutInBag);
 
-        public int ProcessedItemsCount => _convertedToString.Count;
+        public void StartBatcher() => Batcher.Process(_start);
+
+        public void ThrowWhenSquaring(Func<int, bool> throwWhen) => _throwWhenSquaring = throwWhen;
+
+        public void ThrowWhenConvertingToString(Func<int, bool> throwWhen) => _throwWhenConvertingToString = throwWhen;
+
+        public void ThrowWhenPuttingInResultsBag(Func<string, bool> throwWhen) => _throwWhenPuttingInResultsBag = throwWhen;
+
+        public List<int> StartItems => _start.ToList();
+
+        public List<int> ConvertedToString => _convertedToString.ToList();
+
+        public List<string> Results => _results.ToList();
+
+        public List<int> SquaredItems => _squared.ToList();
+
+        public int ProcessedItemsCount => _results.Count;
 
         public bool AllProcessed => ProcessedItemsCount == _start.Count;
 
         public async Task WaitUntilAllProcessed()
         {
             var stopwatch = Stopwatch.StartNew();
-            var lastCount = 0;
+            var lastCount = -1;
             while (true)
             {
-                if (stopwatch.ElapsedMilliseconds > 5000 && lastCount == _convertedToString.Count)
+                if (stopwatch.ElapsedMilliseconds > 5000)
                 {
                     Assert.Fail("Timout: shouldn't take this long");
                 }
-                if (AllProcessed)
+                if (lastCount == _convertedToString.Count)
                 {
                     break;
                 }
@@ -55,20 +69,36 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
                 {
                     lastCount = _convertedToString.Count;
                 }
-                await Task.Delay(500);
+                await Task.Delay(1000);
             }
         }
 
-        private int Square(int input) => input * input;
+        private int Square(int input)
+        {
+            if (_throwWhenSquaring != null && _throwWhenSquaring(input))
+            {
+                throw new InvalidOperationException($"Squaring: {input}");
+            }
+            _squared.Add(input);
+            return input * input;
+        }
 
         private Task<string> ConvertToString(int input)
         {
+            if (_throwWhenConvertingToString != null && _throwWhenConvertingToString(input))
+            {
+                throw new InvalidOperationException($"Converting to string: {input}");
+            }
             _convertedToString.Add(input);
             return Task.FromResult(input.ToString());
         }
 
         private void PutInBag(string input)
         {
+            if (_throwWhenPuttingInResultsBag != null && _throwWhenPuttingInResultsBag(input))
+            {
+                throw new InvalidOperationException($"Result: {input}");
+            }
             _results.Add(input);
         }
     }

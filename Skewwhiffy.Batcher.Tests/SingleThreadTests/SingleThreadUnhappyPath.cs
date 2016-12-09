@@ -35,20 +35,20 @@ namespace Skewwhiffy.Batcher.Tests.SingleThreadTests
         }
 
         [Test]
-        public void ActionWithThrowsWorks()
+        public void AllItemsAreProcessed()
         {
             _batchAction.StartItems.ForEach(s => Assert.That(_batchAction.ProcessedItems.Contains(s)));
         }
 
         [Test]
-        public void ExceptionsCaught()
+        public void ExceptionsCaptured()
         {
             var expected = _batchAction.ProcessedItems.Count(i => !_throwWhen(i));
             Assert.That(_batchAction.Batcher.Exceptions.Count, Is.EqualTo(expected));
         }
 
         [Test]
-        public void ExceptionEventsThrown()
+        public void ExceptionEventsRaised()
         {
             var expected = _batchAction.ProcessedItems.Count(i => !_throwWhen(i));
             Assert.That(_exceptionEvents.Count, Is.EqualTo(expected));
