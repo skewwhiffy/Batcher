@@ -4,15 +4,23 @@ using System.Threading.Tasks;
 
 namespace Skewwhiffy.Batcher.Tests.ChainTests
 {
+    [TestFixture(SynchronicityTestCase.Synchronous)]
+    [TestFixture(SynchronicityTestCase.Asynchronous)]
     public class ChainBatcherHappyPath
     {
         private ChainBatchAction _batchAction;
+        private readonly SynchronicityTestCase _synchronicity;
+
+        public ChainBatcherHappyPath(SynchronicityTestCase synchronicity)
+        {
+            _synchronicity = synchronicity;
+        }
 
         [OneTimeSetUp]
         public async Task BeforeAll()
         {
             _batchAction = new ChainBatchAction();
-            _batchAction.InitializeBatcher();
+            _batchAction.InitializeBatcherStartingWith(_synchronicity);
             _batchAction.StartBatcher();
             await _batchAction.WaitUntilAllProcessed();
         }

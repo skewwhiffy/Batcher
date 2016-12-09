@@ -6,18 +6,37 @@ using System.Threading.Tasks;
 
 namespace Skewwhiffy.Batcher
 {
-    public class SingleThreadBatcher<T>
+    public abstract class SingleThreadBatcher
+    {
+        protected readonly List<Exception> ExceptionsInternal;
+
+        protected SingleThreadBatcher()
+        {
+            ExceptionsInternal = new List<Exception>();
+        }
+
+        public List<Exception> Exceptions => ExceptionsInternal.ToList();
+
+        public event ExceptionEventHandler ExceptionEvent;
+
+        public delegate void ExceptionEventHandler(object sender, BatchExceptionEventArguments args);
+
+        protected void OnException(BatchExceptionEventArguments e)
+        {
+            ExceptionEvent?.Invoke(this, e);
+        }
+    }
+
+    public class SingleThreadBatcher<T> : SingleThreadBatcher
     {
         private readonly ConcurrentQueue<T> _toProcess;
         private readonly Action<T> _actionSync;
         private readonly Func<T, Task> _actionAsync;
-        private readonly List<Exception> _exceptions;
         private Task _processor;
 
         private SingleThreadBatcher()
         {
             _toProcess = new ConcurrentQueue<T>();
-            _exceptions = new List<Exception>();
         }
 
         public SingleThreadBatcher(Action<T> action) : this()
@@ -49,17 +68,6 @@ namespace Skewwhiffy.Batcher
             }
         }
 
-        public List<Exception> Exceptions => _exceptions.ToList();
-
-        public event ExceptionEventHandler ExceptionEvent;
-
-        public delegate void ExceptionEventHandler(object sender, BatchExceptionEventArguments<T> args);
-
-        private void OnException(BatchExceptionEventArguments<T> e)
-        {
-            ExceptionEvent?.Invoke(this, e);
-        }
-
         private async Task Process()
         {
             T current = default(T);
@@ -81,14 +89,14 @@ namespace Skewwhiffy.Batcher
                 }
                 catch (Exception ex)
                 {
-                    lock (_exceptions)
+                    lock (ExceptionsInternal)
                     {
                         OnException(new BatchExceptionEventArguments<T>
                         {
                             Current = current,
                             Exception = ex
                         });
-                        _exceptions.Add(ex);
+                        ExceptionsInternal.Add(ex);
                     }
                 }
             }

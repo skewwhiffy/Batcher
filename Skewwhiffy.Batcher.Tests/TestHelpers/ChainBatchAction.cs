@@ -29,7 +29,29 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
 
         public ChainBatcher<int> Batcher => _batcher;
 
-        public void InitializeBatcher() => _batcher = new ChainBatcher<int>(Square, ConvertToString, PutInBag);
+        public void InitializeBatcherStartingWith(SynchronicityTestCase synchronicity)
+        {
+            _batcher = GetBatcher(synchronicity);
+        }
+
+        private ChainBatcher<int> GetBatcher(SynchronicityTestCase synchronicity)
+        {
+            switch (synchronicity)
+            {
+                case SynchronicityTestCase.Synchronous:
+                    return TakeAnItem
+                    .Then<int, int>(i => Square(i))
+                    .Then(i => ConvertToStringAsync(i))
+                    .AndFinally(s => PutInBag(s));
+                case SynchronicityTestCase.Asynchronous:
+                    return TakeAnItem
+                    .Then<int, int>(i => SquareAsync(i))
+                    .Then(i => ConvertToString(i))
+                    .AndFinally(PutInBagAsync);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
 
         public void StartBatcher() => Batcher.Process(_start);
 
@@ -73,6 +95,11 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
             }
         }
 
+        private Task<int> SquareAsync(int input)
+        {
+            return Task.FromResult(Square(input));
+        }
+
         private int Square(int input)
         {
             if (_throwWhenSquaring != null && _throwWhenSquaring(input))
@@ -83,14 +110,20 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
             return input * input;
         }
 
-        private Task<string> ConvertToString(int input)
+        private string ConvertToString(int input)
         {
+
             if (_throwWhenConvertingToString != null && _throwWhenConvertingToString(input))
             {
                 throw new InvalidOperationException($"Converting to string: {input}");
             }
             _convertedToString.Add(input);
-            return Task.FromResult(input.ToString());
+            return input.ToString();
+        }
+
+        private Task<string> ConvertToStringAsync(int input)
+        {
+            return Task.FromResult(ConvertToString(input));
         }
 
         private void PutInBag(string input)
@@ -100,6 +133,12 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
                 throw new InvalidOperationException($"Result: {input}");
             }
             _results.Add(input);
+        }
+
+        private Task PutInBagAsync(string input)
+        {
+            PutInBag(input);
+            return Task.FromResult(0);
         }
     }
 }

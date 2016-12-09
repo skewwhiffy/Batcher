@@ -29,7 +29,7 @@ namespace Skewwhiffy.Batcher.Tests.SingleThreadTests
             _throwWhen = i => i % 2 == 0;
             _batchAction.ThrowWhen(_throwWhen);
             _batchAction.InitializeBatcher(_synchronicity);
-            _batchAction.Batcher.ExceptionEvent += (o, e) => _exceptionEvents.Add(e);
+            _batchAction.Batcher.ExceptionEvent += (o, e) => _exceptionEvents.Add(e as BatchExceptionEventArguments<int>);
             _batchAction.StartBatcher();
             await _batchAction.WaitUntilAllProcessed();
         }

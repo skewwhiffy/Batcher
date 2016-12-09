@@ -7,10 +7,18 @@ using System;
 
 namespace Skewwhiffy.Batcher.Tests.ChainTests
 {
+    [TestFixture(SynchronicityTestCase.Synchronous)]
+    [TestFixture(SynchronicityTestCase.Asynchronous)]
     public class ChainBatcherUnhappyPath
     {
+        private readonly SynchronicityTestCase _synchronicity;
         private ChainBatchAction _batchAction;
         private ConcurrentBag<Tuple<object, BatchExceptionEventArguments>> _batchExceptionEvents;
+
+        public ChainBatcherUnhappyPath(SynchronicityTestCase synchronicity)
+        {
+            _synchronicity = synchronicity;
+        }
 
         [OneTimeSetUp]
         public async Task BeforeAll()
@@ -20,7 +28,7 @@ namespace Skewwhiffy.Batcher.Tests.ChainTests
             _batchAction.ThrowWhenSquaring(ThrowWhenSquaring);
             _batchAction.ThrowWhenConvertingToString(ThrowWhenConvertingToString);
             _batchAction.ThrowWhenPuttingInResultsBag(ThrowWhenPuttingInResultsBag);
-            _batchAction.InitializeBatcher();
+            _batchAction.InitializeBatcherStartingWith(_synchronicity);
             _batchAction.Batcher.ExceptionEvent += (o, e) => _batchExceptionEvents.Add(Tuple.Create(o, e));
             _batchAction.StartBatcher();
             await _batchAction.WaitUntilAllProcessed();
