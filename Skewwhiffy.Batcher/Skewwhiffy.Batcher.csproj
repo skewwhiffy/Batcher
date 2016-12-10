@@ -41,9 +41,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BatchExceptionEventArguments.cs" />
-    <Compile Include="FunctionalExtensions.cs" />
-    <Compile Include="SingleThreadBatcher.cs" />
+    <Compile Include="Fluent\IBatchChainBuilder.cs" />
+    <Compile Include="Fluent\IBatcher.cs" />
+    <Compile Include="Fluent\TakeAnItem.cs" />
+    <Compile Include="Fluent\ChainBuilder.cs" />
+    <Compile Include="Extensions\BatchExceptionEventArguments.cs" />
+    <Compile Include="Impl\ChainBatcher.cs" />
+    <Compile Include="Extensions\FunctionalExtensions.cs" />
+    <Compile Include="Impl\Event.cs" />
+    <Compile Include="Impl\SingleTaskBatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

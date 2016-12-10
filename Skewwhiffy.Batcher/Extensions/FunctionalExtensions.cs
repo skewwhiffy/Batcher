@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Skewwhiffy.Batcher
+namespace Skewwhiffy.Batcher.Extensions
 {
     public static class FunctionalExtensions
     {
