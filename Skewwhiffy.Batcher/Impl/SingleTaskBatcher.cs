@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Skewwhiffy.Batcher.Extensions;
 using Skewwhiffy.Batcher.Fluent;
+using Skewwhiffy.Batcher.Queue;
 
 namespace Skewwhiffy.Batcher.Impl
 {
@@ -13,12 +14,15 @@ namespace Skewwhiffy.Batcher.Impl
     {
         protected readonly CancellationTokenSource TokenSource;
         protected readonly List<Exception> ExceptionsInternal;
+        protected volatile int Threads = 1;
 
         protected SingleTaskBatcher()
         {
             ExceptionsInternal = new List<Exception>();
             TokenSource = new CancellationTokenSource();
         }
+
+        public void WithThreads(int threads) => Threads = threads;
 
         public abstract bool IsDone { get; }
 
@@ -35,15 +39,9 @@ namespace Skewwhiffy.Batcher.Impl
 
         public event Event.ExceptionEventHandler ExceptionEvent;
 
-        protected void OnException(BatchExceptionEventArguments e)
-        {
-            ExceptionEvent?.Invoke(this, e);
-        }
+        protected void OnException(BatchExceptionEventArguments e) => ExceptionEvent?.Invoke(this, e);
 
-        public void Dispose()
-        {
-            Dispose(true);
-        }
+        public void Dispose() => Dispose(true);
 
         protected void Dispose(bool disposing)
         {
@@ -56,15 +54,15 @@ namespace Skewwhiffy.Batcher.Impl
 
     internal class SingleTaskBatcher<T> : SingleTaskBatcher, IBatcher<T>
     {
-        private readonly ConcurrentQueue<T> _toProcess;
         private readonly Action<T> _actionSync;
         private readonly Func<T, CancellationToken, Task> _actionAsync;
-        private Task _processor;
+        private List<Task> _processor;
         private volatile bool _waiting;
+        private readonly Lazy<ConcurrentMultiQueue<T>> _toProcess;
 
         private SingleTaskBatcher()
         {
-            _toProcess = new ConcurrentQueue<T>();
+            _toProcess = new Lazy<ConcurrentMultiQueue<T>>(() => new ConcurrentMultiQueue<T>(Threads));
         }
 
         public SingleTaskBatcher(Action<T> action) : this()
@@ -82,28 +80,46 @@ namespace Skewwhiffy.Batcher.Impl
             _actionAsync = action;
         }
 
-        public override bool IsDone => (_waiting && _toProcess.Count == 0) || _processor == null || _processor.IsCompleted;
-
-        public void Process(IEnumerable<T> toProcess)
+        public new IBatcher<T> WithThreads(int threads)
         {
-            toProcess.ForEach(Process);
+            base.WithThreads(threads);
+            return this;
         }
+
+        private ConcurrentMultiQueue<T> ToProcess => _toProcess.Value;
+
+        public override bool IsDone => (_waiting && ToProcess.Count == 0) || _processor == null || _processor.All(p => p.IsCompleted);
+
+        public void Process(IEnumerable<T> toProcess) => toProcess.ForEach(Process);
 
         public void Process(T toProcess)
         {
             Start();
-            _toProcess.Enqueue(toProcess);
+            ToProcess.Enqueue(toProcess);
         }
 
         private void Start()
         {
-            if (_processor == null)
+            if (_processor != null)
             {
-                _processor = Task.Run(() => Process(TokenSource.Token), TokenSource.Token);
+                return;
+            }
+            lock (this)
+            {
+                if (_processor != null)
+                {
+                    return;
+                }
+                _processor = new List<Task>();
+            }
+            for (var i = 0; i < Threads; i++)
+            {
+                var queue = ToProcess[i];
+                _processor.Add(Task.Run(() => Process(queue, TokenSource.Token), TokenSource.Token));
             }
         }
 
-        private async Task Process(CancellationToken token)
+        private async Task Process(ConcurrentQueue<T> queue, CancellationToken token)
         {
             T current = default(T);
             while (true)
@@ -114,11 +130,17 @@ namespace Skewwhiffy.Batcher.Impl
                     {
                         return;
                     }
-                    _waiting = !_toProcess.TryDequeue(out current);
-                    if (_waiting)
+                    var waiting = !queue.TryDequeue(out current);
+                    if (waiting)
                     {
+                        _waiting = true;
                         await Task.Delay(TimeSpan.FromSeconds(1), token);
                         continue;
+                    }
+                    _waiting = false;
+                    if (current.Equals(default(T)))
+                    {
+                        Console.WriteLine("HERE");
                     }
                     _actionSync?.Invoke(current);
                     if (_actionAsync != null)

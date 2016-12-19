@@ -22,6 +22,12 @@ namespace Skewwhiffy.Batcher.Impl
             batchers.ForEach(b => b.ExceptionEvent += (o, e) => ExceptionEvent?.Invoke(o, e));
         }
 
+        public IBatcher<T> WithThreads(int threads)
+        {
+            _batchers.ForEach(b => b.WithThreads(threads));
+            return this;
+        }
+
         public bool IsDone => _batchers.All(b => b.IsDone);
 
         public event Event.ExceptionEventHandler ExceptionEvent;
@@ -30,10 +36,7 @@ namespace Skewwhiffy.Batcher.Impl
 
         public void Process(IEnumerable<T> toProcess) => _firstBatcher.Process(toProcess);
 
-        public void Dispose()
-        {
-            Dispose(true);
-        }
+        public void Dispose() => Dispose(true);
 
         protected void Dispose(bool disposing)
         {

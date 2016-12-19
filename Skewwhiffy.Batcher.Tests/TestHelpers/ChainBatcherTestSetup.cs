@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Skewwhiffy.Batcher.Extensions;
 using Skewwhiffy.Batcher.Fluent;
 
 namespace Skewwhiffy.Batcher.Tests.TestHelpers
@@ -24,11 +25,21 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
         {
             _squared = new ConcurrentBag<int>();
             _convertedToString = new ConcurrentBag<int>();
-            _start = Enumerable.Range(0, 100).ToList();
+            _start = 10.To(109).ToList();
             _results = new ConcurrentBag<string>();
         }
 
         public TimeSpan? PauseBetweenProcessing { get; set; }
+
+        public IBatcher<int> GetBatcher(SynchronicityTestCase synchronicity, ParallelMultiplicity multiplicity)
+        {
+            var batcher = GetBatcher(synchronicity);
+            if (multiplicity == ParallelMultiplicity.MultiThreaded)
+            {
+                batcher.WithThreads(5);
+            }
+            return batcher;
+        }
 
         public IBatcher<int> GetBatcher(SynchronicityTestCase synchronicity)
         {
