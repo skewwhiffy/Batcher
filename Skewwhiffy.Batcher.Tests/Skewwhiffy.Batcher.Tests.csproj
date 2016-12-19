@@ -54,6 +54,7 @@
     <Compile Include="SingleTaskTests\SingleTaskUnhappyPath.cs" />
     <Compile Include="TestHelpers\BatcherExtensions.cs" />
     <Compile Include="TestHelpers\ISetupBatchTests.cs" />
+    <Compile Include="TestHelpers\ParallelMultiplicity.cs" />
     <Compile Include="TestHelpers\SingleTaskBatcherTestSetup.cs" />
     <Compile Include="TestHelpers\ChainBatcherTestSetup.cs" />
     <Compile Include="TestHelpers\SynchronicityTestCase.cs" />

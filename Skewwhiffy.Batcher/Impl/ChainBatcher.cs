@@ -22,6 +22,11 @@ namespace Skewwhiffy.Batcher.Impl
             batchers.ForEach(b => b.ExceptionEvent += (o, e) => ExceptionEvent?.Invoke(o, e));
         }
 
+        public IBatcher<T> WithThreads(int threads)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool IsDone => _batchers.All(b => b.IsDone);
 
         public event Event.ExceptionEventHandler ExceptionEvent;

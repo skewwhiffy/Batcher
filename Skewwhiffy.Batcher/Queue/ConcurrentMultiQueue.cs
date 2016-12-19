@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Skewwhiffy.Batcher.Extensions;
 
 namespace Skewwhiffy.Batcher.Queue
@@ -31,5 +28,7 @@ namespace Skewwhiffy.Batcher.Queue
         public int Count => _queues.Sum(q => q.Count);
 
         public List<ConcurrentQueue<T>> Queues => _queues;
+
+        public ConcurrentQueue<T> this[int index] => Queues[index];
     }
 }

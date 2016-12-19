@@ -32,6 +32,16 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
 
         public List<int> StartItems => _start.ToList();
 
+        public IBatcher<int> GetBatcher(SynchronicityTestCase synchronicity, ParallelMultiplicity multiplicity)
+        {
+            var batcher = GetBatcher(synchronicity);
+            if (multiplicity == ParallelMultiplicity.MultiThreaded)
+            {
+                batcher.WithThreads(5);
+            }
+            return batcher;
+        }
+
         public IBatcher<int> GetBatcher(SynchronicityTestCase synchronicity)
         {
             switch (synchronicity)
