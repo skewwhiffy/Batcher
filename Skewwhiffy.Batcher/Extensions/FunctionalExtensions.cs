@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Skewwhiffy.Batcher.Extensions
 {
@@ -11,6 +12,11 @@ namespace Skewwhiffy.Batcher.Extensions
             {
                 action(c);
             }
+        }
+
+        public static IEnumerable<int> To(this int from, int upToInclusive)
+        {
+            return Enumerable.Range(from, upToInclusive - from + 1);
         }
     }
 }
