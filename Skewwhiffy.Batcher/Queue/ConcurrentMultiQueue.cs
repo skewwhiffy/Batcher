@@ -7,6 +7,7 @@ namespace Skewwhiffy.Batcher.Queue
 {
     public class ConcurrentMultiQueue<T>
     {
+        private readonly object _lock = new object();
         private readonly List<ConcurrentQueue<T>> _queues;
         private volatile int _roundRobin;
 
@@ -17,11 +18,14 @@ namespace Skewwhiffy.Batcher.Queue
 
         public void Enqueue(T value)
         {
-            _queues[_roundRobin].Enqueue(value);
-            _roundRobin++;
-            if (_roundRobin >= _queues.Count)
+            lock (_lock)
             {
-                _roundRobin = 0;
+                _queues[_roundRobin].Enqueue(value);
+                _roundRobin++;
+                if (_roundRobin >= _queues.Count)
+                {
+                    _roundRobin = 0;
+                }
             }
         }
 

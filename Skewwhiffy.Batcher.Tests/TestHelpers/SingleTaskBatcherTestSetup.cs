@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Skewwhiffy.Batcher.Extensions;
 using Skewwhiffy.Batcher.Fluent;
 
 namespace Skewwhiffy.Batcher.Tests.TestHelpers
@@ -16,7 +17,7 @@ namespace Skewwhiffy.Batcher.Tests.TestHelpers
         public SingleTaskBatcherTestSetup()
         {
             ThrowWhen = i => false;
-            _start = Enumerable.Range(0, 100).ToList();
+            _start = 1.To(100).ToList();
             _processed = new ConcurrentBag<int>();
         }
 

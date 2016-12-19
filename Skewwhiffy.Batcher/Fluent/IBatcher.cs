@@ -6,8 +6,8 @@ namespace Skewwhiffy.Batcher.Fluent
 {
     public interface IBatcher<in T> : IDisposable
     {
-        IBatcher<T> WithThreads(int threads);
         event Event.ExceptionEventHandler ExceptionEvent;
+        IBatcher<T> WithThreads(int threads);
         void Process(IEnumerable<T> toProcess);
         List<Exception> Exceptions { get; }
         bool IsDone { get; }
