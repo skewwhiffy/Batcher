@@ -24,7 +24,7 @@ namespace Skewwhiffy.Batcher.Impl
 
         public IBatcher<T> WithThreads(int threads)
         {
-            _batchers.ForEach(b => b.WithThreads(threads));
+            _batchers.FindAll(b => !b.Threads.HasValue).ForEach(b => b.WithThreads(threads));
             return this;
         }
 

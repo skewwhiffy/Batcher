@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skewwhiffy.Batcher", "Skeww
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skewwhiffy.Batcher.Tests", "Skewwhiffy.Batcher.Tests\Skewwhiffy.Batcher.Tests.csproj", "{6D6CDD93-694B-422E-B276-39CC0FFF37ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Skewwhiffy.Batcher.Example.Tests", "Skewwhiffy.Batcher.Example.Tests\Skewwhiffy.Batcher.Example.Tests.csproj", "{4C0471FA-334E-4063-B655-E26AEB27E2FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{6D6CDD93-694B-422E-B276-39CC0FFF37ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D6CDD93-694B-422E-B276-39CC0FFF37ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D6CDD93-694B-422E-B276-39CC0FFF37ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C0471FA-334E-4063-B655-E26AEB27E2FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C0471FA-334E-4063-B655-E26AEB27E2FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C0471FA-334E-4063-B655-E26AEB27E2FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C0471FA-334E-4063-B655-E26AEB27E2FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

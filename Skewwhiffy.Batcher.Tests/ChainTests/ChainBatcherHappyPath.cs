@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Skewwhiffy.Batcher.Tests.TestHelpers;
 using System.Threading.Tasks;
 using Skewwhiffy.Batcher.Fluent;
@@ -32,14 +29,13 @@ namespace Skewwhiffy.Batcher.Tests.ChainTests
             _setup = new ChainBatcherTestSetup();
             _batcher = _setup.GetBatcher(_synchronicity, _multiplicity);
             _batcher.Process(_setup.StartItems);
-            await _batcher.WaitUntilDone();
-            await _setup.WaitUntil(s => s.ProcessedItems.Count >= s.StartItems.Count,
-                    s => s.ProcessedItems.GetMessage());
-            await
-                _setup.WaitUntil(s => s.SquaredItems.Count >= s.StartItems.Count, s => s.SquaredItems.GetMessage());
-            await _setup.WaitUntil(s => s.ConvertedToString.Count == s.StartItems.Count,
-                s => s.ConvertedToString.GetMessage());
-            await _setup.WaitUntil(s => s.Results.Count >= s.StartItems.Count, s => s.Results.GetMessage());
+            var expectedCount = _setup.StartItems.Count;
+            await Task.WhenAll(
+                _batcher.WaitUntilDone(),
+                _setup.WaitUntil(s => s.ProcessedItems.Count >= expectedCount, s => s.ProcessedItems.GetMessage()),
+                _setup.WaitUntil(s => s.SquaredItems.Count >= expectedCount, s => s.SquaredItems.GetMessage()),
+                _setup.WaitUntil(s => s.ConvertedToString.Count == expectedCount, s => s.ConvertedToString.GetMessage()),
+                _setup.WaitUntil(s => s.Results.Count >= expectedCount, s => s.Results.GetMessage()));
         }
 
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Skewwhiffy.Batcher.Impl;
@@ -65,6 +66,12 @@ namespace Skewwhiffy.Batcher.Fluent
             {
                 firstBatcher
             };
+        }
+
+        public IBatchChainBuilder<TIn, TOut> WithThreads(int threadCount)
+        {
+            _batchers.Last().WithThreads(threadCount);
+            return this;
         }
 
         public IBatchChainBuilder<TIn, TNewOut> Then<TNewOut>(Func<TOut, Task<TNewOut>> func)
