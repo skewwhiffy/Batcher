@@ -30,6 +30,8 @@ namespace Skewwhiffy.Batcher.Impl
 
         public bool IsDone => _batchers.All(b => b.IsDone);
 
+        internal List<SingleTaskBatcher> Batchers => _batchers;
+
         public event Event.ExceptionEventHandler ExceptionEvent;
 
         public List<Exception> Exceptions => _getExceptions.SelectMany(ge => ge()).ToList();

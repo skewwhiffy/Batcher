@@ -8,12 +8,13 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using Skewwhiffy.Batcher.Extensions;
 using Skewwhiffy.Batcher.Fluent;
+using Skewwhiffy.Batcher.Impl;
 
 namespace Skewwhiffy.Batcher.Example.Tests
 {
     public class MoveFilesAround
     {
-        private const int NumberOfFiles = 1000;
+        private const int NumberOfFiles = 10000;
         private const int CreateFileThreads = 3;
         private const int MoveFileThreads = 4;
         private const int MungeFileThreads = 5;
@@ -22,6 +23,7 @@ namespace Skewwhiffy.Batcher.Example.Tests
         private volatile string _moved;
         private volatile string _munged;
         private List<List<TaskMetadata>> _results;
+        private IBatcher<int> _batcher;
 
         private string Sandbox
         {
@@ -102,14 +104,14 @@ namespace Skewwhiffy.Batcher.Example.Tests
         [OneTimeSetUp]
         public async Task BeforeAll()
         {
-            var batcher = TakeAnItem<int>
+            _batcher = TakeAnItem<int>
                 .Then(CreateFile)
                 .WithThreads(CreateFileThreads)
                 .Then(MoveFile)
                 .WithThreads(MoveFileThreads)
                 .AndFinally(MungeFile)
                 .WithThreads(MungeFileThreads);
-            batcher.Process(1.To(NumberOfFiles));
+            _batcher.Process(1.To(NumberOfFiles));
 
             var logNext = 0;
             while (true)
@@ -158,19 +160,13 @@ namespace Skewwhiffy.Batcher.Example.Tests
         }
 
         [Test]
-        public void FileMungeIsMultiThreaded()
+        public void BatchersAreMultiThreaded()
         {
-            var threadIds = _results.Select(r => r[1]).Select(tm => tm.ThreadId).Distinct().ToList();
+            var typedBatcher = _batcher as ChainBatcher<int>;
+            Assert.IsNotNull(typedBatcher);
+            var batcherThreadCounts = typedBatcher.Batchers.Select(b => b.Threads).Distinct().ToList();
 
-            Assert.That(threadIds.Count, Is.EqualTo(MungeFileThreads));
-        }
-
-        [Test]
-        public void CreateFileIsMultiThreaded()
-        {
-            var threadIds = _results.Select(r => r[0]).Select(tm => tm.ThreadId).Distinct().ToList();
-
-            Assert.That(threadIds.Count, Is.EqualTo(CreateFileThreads));
+            Assert.That(batcherThreadCounts, Is.EquivalentTo(new[] { MoveFileThreads, CreateFileThreads, MungeFileThreads}));
         }
 
         private async Task<string> CreateFile(int i)
