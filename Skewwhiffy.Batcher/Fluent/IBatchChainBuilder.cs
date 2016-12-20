@@ -6,6 +6,7 @@ namespace Skewwhiffy.Batcher.Fluent
 {
     public interface IBatchChainBuilder<in TIn, out TOut>
     {
+        IBatchChainBuilder<TIn, TOut> WithThreads(int threadCount);
         IBatchChainBuilder<TIn, TNewOut> Then<TNewOut>(Func<TOut, TNewOut> func);
         IBatchChainBuilder<TIn, TNewOut> Then<TNewOut>(Func<TOut, Task<TNewOut>> func);
         IBatchChainBuilder<TIn, TNewOut> Then<TNewOut>(Func<TOut, CancellationToken, Task<TNewOut>> func);

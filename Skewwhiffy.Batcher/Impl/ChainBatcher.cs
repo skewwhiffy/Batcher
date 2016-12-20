@@ -24,11 +24,13 @@ namespace Skewwhiffy.Batcher.Impl
 
         public IBatcher<T> WithThreads(int threads)
         {
-            _batchers.ForEach(b => b.WithThreads(threads));
+            _batchers.FindAll(b => !b.Threads.HasValue).ForEach(b => b.WithThreads(threads));
             return this;
         }
 
         public bool IsDone => _batchers.All(b => b.IsDone);
+
+        internal List<SingleTaskBatcher> Batchers => _batchers;
 
         public event Event.ExceptionEventHandler ExceptionEvent;
 
